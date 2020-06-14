@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Life where
 
@@ -50,7 +51,7 @@ type Coord = (Int, Int)
 -- | The status of a cell in the grid.
 -- Avoids boolean blindness and is arguably easier to read.
 data Cell = Alive | Dead
-    deriving Eq
+    deriving (Show, Eq)
 
 -- | Given a list of the coords that are alive, creates the grid.
 mkGrid :: [Coord] -> Grid Cell
@@ -60,10 +61,18 @@ mkGrid xs = store lookup (0, 0)
 -- | Generic rules for the game that determine how a cell changes based on the current grid.
 type Rule = Grid Cell -> Cell
 
--- | The 8 neighbouring tiles relative to (0, 0), the cell itself
+-- | The 8 neighbouring tiles relative to (0, 0), the cell itself.
 neighbourCoords :: [Coord]
 neighbourCoords =
     [ (x, y) | x <- [-1, 0, 1], y <- [-1, 0, 1], (x, y) /= (0, 0) ]
+
+-- | Combines two coordinates together by adding their x and y components.
+addCoords :: Coord -> Coord -> Coord
+addCoords (x, y) (x', y') = (x + x', y + y')
+
+-- | Given relative coordinates, make them absolute with respect to the given coordinate.
+at :: [Coord] -> Coord -> [Coord]
+at cs c = map (addCoords c) cs
 
 -- | The typical rules for the Game of Life.
 -- https://en.wikipedia.org/wiki/Conway's_Game_of_Life
@@ -77,11 +86,32 @@ basicRule g = case cellStatus of
     Alive -> if numNeighboursAlive `elem` [2, 3] then Alive else Dead
     Dead  -> if numNeighboursAlive == 3 then Alive else Dead
   where
-    cellStatus = extract g
-    addCoords (x, y) (x', y') = (x + x', y + y')
-    neighbours         = experiment (\s -> addCoords s <$> neighbourCoords) g
+    cellStatus         = extract g
+    neighbours         = experiment (at neighbourCoords) g
     numNeighboursAlive = length (filter (== Alive) neighbours)
 
 -- | Advances the grid by one step according to the given rule set.
 step :: Rule -> Grid Cell -> Grid Cell
 step = extend
+
+-- | Produces a string representation of the grid.
+render :: Grid Cell -> String
+render (StoreT (Identity (Compose g)) _) = foldMap
+    ((++ "\n") . foldMap
+        (\case
+            Alive -> "#"
+            Dead  -> "."
+        )
+    )
+    g
+
+-- | Some common patterns within the game. 
+glider, blinker, beacon :: [Coord]
+glider = [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
+blinker = [(0, 0), (1, 0), (2, 0)]
+beacon = [(0, 0), (1, 0), (0, 1), (3, 2), (2, 3), (3, 3)]
+
+-- | Starting grid containing common patterns at certain coordinates.
+start :: Grid Cell
+start =
+    mkGrid $ glider `at` (0, 0) ++ beacon `at` (15, 5) ++ blinker `at` (16, 4)
