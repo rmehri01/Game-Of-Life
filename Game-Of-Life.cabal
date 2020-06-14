@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 22a2120dbc5348d2c3cffceeeca683d0a254ba949aee1e41a43453be2ae4cd9d
+-- hash: d48c9007bd50e8725751a8a498a0468c8d8cf0018e137daf7bac8e1f5a9a64b1
 
 name:           Game-Of-Life
 version:        0.1.0.0
@@ -23,13 +23,17 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Life
   other-modules:
       Paths_Game_Of_Life
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      adjunctions
+    , base >=4.7 && <5
+    , comonad
+    , distributive
+    , vector
   default-language: Haskell2010
 
 executable Game-Of-Life-exe
@@ -41,7 +45,11 @@ executable Game-Of-Life-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       Game-Of-Life
+    , adjunctions
     , base >=4.7 && <5
+    , comonad
+    , distributive
+    , vector
   default-language: Haskell2010
 
 test-suite Game-Of-Life-test
@@ -54,5 +62,9 @@ test-suite Game-Of-Life-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       Game-Of-Life
+    , adjunctions
     , base >=4.7 && <5
+    , comonad
+    , distributive
+    , vector
   default-language: Haskell2010
