@@ -12,7 +12,6 @@ import           Data.Functor.Rep               ( Representable(..)
                                                 , distributeRep
                                                 )
 import           Data.Functor.Identity          ( Identity(..) )
-import           Control.Arrow                  ( (***) )
 import           Control.Comonad.Representable.Store
                                                 ( Store(..)
                                                 , StoreT(..)
@@ -63,7 +62,7 @@ mkGrid xs = store lookup (0, 0)
 -- | Generic rules for the game that determine how a cell changes based on the current grid.
 type Rule = Grid Cell -> Cell
 
--- | The 8 neighbouring tiles relative to (0, 0), the cell itself.
+-- | The 8 neighbouring tiles relative to (0, 0), which is the cell itself.
 neighbourCoords :: [Coord]
 neighbourCoords =
     [ (x, y) | x <- [-1, 0, 1], y <- [-1, 0, 1], (x, y) /= (0, 0) ]
@@ -74,7 +73,7 @@ addCoords (x, y) (x', y') = (x + x', y + y')
 
 -- | Given relative coordinates, make them absolute with respect to the given coordinate.
 at :: [Coord] -> Coord -> [Coord]
-at cs c = map (addCoords c) cs
+coords `at` origin = map (addCoords origin) coords
 
 -- | The typical rules for the Game of Life.
 -- https://en.wikipedia.org/wiki/Conway's_Game_of_Life
@@ -84,11 +83,12 @@ at cs c = map (addCoords c) cs
 -- * Any live cell with more than three live neighbours dies, as if by overpopulation.
 -- * Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 basicRule :: Rule
-basicRule g = case cellStatus of
-    Alive -> if numNeighboursAlive `elem` [2, 3] then Alive else Dead
-    Dead  -> if numNeighboursAlive == 3 then Alive else Dead
+basicRule g = if liveCondition then Alive else Dead
   where
-    cellStatus         = extract g
+    cellStatus    = extract g
+    liveCondition = case cellStatus of
+        Alive -> numNeighboursAlive `elem` [2, 3]
+        Dead  -> numNeighboursAlive == 3
     neighbours         = experiment (at neighbourCoords) g
     numNeighboursAlive = length (filter (== Alive) neighbours)
 
