@@ -54,9 +54,11 @@ data Cell = Alive | Dead
     deriving (Show, Eq)
 
 -- | Given a list of the coords that are alive, creates the grid.
+-- The lookup function flips the given coordinates since the Representable
+-- of Compose will result in indexing by (y, x) not (x, y).
 mkGrid :: [Coord] -> Grid Cell
 mkGrid xs = store lookup (0, 0)
-    where lookup crd = if crd `elem` xs then Alive else Dead
+    where lookup (y, x) = if (x, y) `elem` xs then Alive else Dead
 
 -- | Generic rules for the game that determine how a cell changes based on the current grid.
 type Rule = Grid Cell -> Cell
