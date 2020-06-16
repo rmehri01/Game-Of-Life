@@ -39,7 +39,7 @@ instance Representable VBounded where
 
 -- | The size of one side length in a gridSize x gridSize grid.
 gridSize :: Int
-gridSize = 20
+gridSize = 40
 
 -- | Memoized grid of values indexed by Coord.
 type Grid a = Store (Compose VBounded VBounded) a
@@ -97,8 +97,8 @@ step :: Rule -> Grid Cell -> Grid Cell
 step = extend
 
 -- | Produces a string representation of the grid.
-render :: Grid Cell -> String
-render (StoreT (Identity (Compose g)) _) = foldMap
+showGrid :: Grid Cell -> String
+showGrid (StoreT (Identity (Compose g)) _) = foldMap
     ((++ "\n") . foldMap
         (\case
             Alive -> "#"
