@@ -21,6 +21,7 @@ dependencies:
 - distributive
 - adjunctions
 - comonad
+- gloss
 
 library:
   source-dirs: src
