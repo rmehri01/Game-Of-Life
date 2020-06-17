@@ -2,11 +2,12 @@ module UI where
 
 import           Life
 import           Data.Vector                    ( toList )
+import           Data.Functor.Identity          ( Identity(..) )
 import           Control.Comonad.Representable.Store
                                                 ( Store(..)
                                                 , StoreT(..)
                                                 , runStore
-                                                , experiment
+                                                , pos
                                                 )
 import           Control.Comonad                ( extract )
 import           Graphics.Gloss
@@ -61,19 +62,23 @@ handleEvent :: Event -> (Grid Cell, Bool) -> (Grid Cell, Bool)
 handleEvent e w@(g, b) = case e of
   (EventKey (SpecialKey KeySpace) Down _ _) -> (g, not b)
   (EventKey (MouseButton LeftButton) Down _ (x, y)) ->
-    let clickedCoord = (- (round (y / squareLen + 0.5)) + 20, round (x / squareLen - 0.5) + 20)
-    in  (step (flipRule clickedCoord) g, b)
+    let shift = gridSize `div` 2
+        clickedCoord =
+            (-(ceiling (y / squareLen)) + shift, floor (x / squareLen) + shift)
+    in  (step (flipCoord clickedCoord) g, b)
   _ -> w
 
-flipRule clickedCoord g = case cellFound of
-  Just _ -> case cellStatus of
+-- | Creates a rule that only flips the cell state of a single coord.
+flipCoord :: Coord -> Rule
+flipCoord clickedCoord g = if clickedCoord == currentPos
+  then flippedCell
+  else cellStatus
+ where
+  currentPos  = pos g
+  cellStatus  = extract g
+  flippedCell = case cellStatus of
     Alive -> Dead
     Dead  -> Alive
-  Nothing -> cellStatus
- where
-  cellStatus = extract g
-  cellFound =
-    experiment (\c -> if c == clickedCoord then Just c else Nothing) g
 
 
 -- TODO: add cycle counter
