@@ -6,6 +6,7 @@ import           Control.Comonad.Representable.Store
                                                 ( Store(..)
                                                 , StoreT(..)
                                                 , runStore
+                                                , experiment
                                                 )
 import           Control.Comonad                ( extract )
 import           Graphics.Gloss
@@ -59,9 +60,21 @@ centerGrid = translate (-distToMiddle) distToMiddle
 handleEvent :: Event -> (Grid Cell, Bool) -> (Grid Cell, Bool)
 handleEvent e w@(g, b) = case e of
   (EventKey (SpecialKey KeySpace) Down _ _) -> (g, not b)
-  (EventKey (MouseButton LeftButton) Down _ (x, y)) -> undefined
+  (EventKey (MouseButton LeftButton) Down _ (x, y)) ->
+    let clickedCoord = (- (round (y / squareLen + 0.5)) + 20, round (x / squareLen - 0.5) + 20)
+    in  (step (flipRule clickedCoord) g, b)
   _ -> w
 
+flipRule clickedCoord g = case cellFound of
+  Just _ -> case cellStatus of
+    Alive -> Dead
+    Dead  -> Alive
+  Nothing -> cellStatus
+ where
+  cellStatus = extract g
+  cellFound =
+    experiment (\c -> if c == clickedCoord then Just c else Nothing) g
+
+
 -- TODO: add cycle counter
--- TODO: mouse interaction to set up initial grid 
 -- TODO: add variable speed or maybe manually control stepping
