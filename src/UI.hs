@@ -1,14 +1,8 @@
 module UI where
 
 import           Life
-import           Data.Vector                    ( toList )
 import           Data.Functor.Identity          ( Identity(..) )
 import           Control.Comonad.Representable.Store
-                                                ( Store(..)
-                                                , StoreT(..)
-                                                , runStore
-                                                , pos
-                                                )
 import           Control.Comonad                ( extract )
 import           Graphics.Gloss
 import           Graphics.Gloss.Interface.IO.Interact
@@ -41,7 +35,7 @@ renderGrid g = pictures
               singleSquare
   | x <- [0 .. gridSize - 1]
   , y <- [0 .. gridSize - 1]
-  , let c = chooseColor ((fst $ runStore g) (y, x))
+  , let c = chooseColor (peek (y, x) g)
   , let singleSquare = rectangleWire squareLen squareLen
           <> color c (rectangleSolid squareLen squareLen)
   ]
@@ -70,16 +64,10 @@ handleEvent e w@(g, b) = case e of
 
 -- | Creates a rule that only flips the cell state of a single coord.
 flipCoord :: Coord -> Rule
-flipCoord clickedCoord g = if clickedCoord == currentPos
-  then flippedCell
-  else cellStatus
+flipCoord coord g = if coord == currentPos then flippedCell else cellStatus
  where
   currentPos  = pos g
   cellStatus  = extract g
   flippedCell = case cellStatus of
     Alive -> Dead
     Dead  -> Alive
-
-
--- TODO: add cycle counter
--- TODO: add variable speed or maybe manually control stepping
