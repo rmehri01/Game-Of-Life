@@ -12,7 +12,7 @@ import           Graphics.Gloss.Interface.IO.Interact
 runSimulation :: Rule -> Grid Cell -> IO ()
 runSimulation r g = play window
                          white
-                         2
+                         8
                          (g, False)
                          (centerGrid . renderGrid . fst)
                          handleEvent
