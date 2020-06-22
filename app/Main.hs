@@ -4,4 +4,4 @@ import           Life
 import           UI
 
 main :: IO ()
-main = runSimulation basicRule start
+main = runSimulation basicRule startEmpty 

@@ -44,20 +44,19 @@ gridSize = 40
 -- | Memoized grid of values indexed by Coord.
 type Grid a = Store (Compose VBounded VBounded) a
 
--- | An (x, y) coordinate on the grid
+-- | A (y, x) coordinate on the grid
+-- The Representable of Compose will result in indexing by (y, x).
 type Coord = (Int, Int)
 
 -- | The status of a cell in the grid.
--- Avoids boolean blindness and is arguably easier to read.
+-- Avoids boolean blindness and is arguably more natural to read.
 data Cell = Alive | Dead
     deriving (Show, Eq)
 
 -- | Given a list of the coords that are alive, creates the grid.
--- The lookup function flips the given coordinates since the Representable
--- of Compose will result in indexing by (y, x) not (x, y).
 mkGrid :: [Coord] -> Grid Cell
 mkGrid xs = store lookup (0, 0)
-    where lookup (y, x) = if (x, y) `elem` xs then Alive else Dead
+    where lookup p = if p `elem` xs then Alive else Dead
 
 -- | Generic rules for the game that determine how a cell changes based on the current grid.
 type Rule = Grid Cell -> Cell
@@ -65,11 +64,11 @@ type Rule = Grid Cell -> Cell
 -- | The 8 neighbouring tiles relative to (0, 0), which is the cell itself.
 neighbourCoords :: [Coord]
 neighbourCoords =
-    [ (x, y) | x <- [-1, 0, 1], y <- [-1, 0, 1], (x, y) /= (0, 0) ]
+    [ (y, x) | y <- [-1, 0, 1], x <- [-1, 0, 1], (y, x) /= (0, 0) ]
 
 -- | Combines two coordinates together by adding their x and y components.
 addCoords :: Coord -> Coord -> Coord
-addCoords (x, y) (x', y') = (x + x', y + y')
+addCoords (y, x) (y', x') = (y + y', x + x')
 
 -- | Given relative coordinates, make them absolute with respect to the given coordinate.
 at :: [Coord] -> Coord -> [Coord]
@@ -109,11 +108,14 @@ showGrid (StoreT (Identity (Compose g)) _) = foldMap
 
 -- | Some common patterns within the game. 
 glider, blinker, beacon :: [Coord]
-glider = [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
+glider = [(0, 1), (2, 1), (2, 0), (1, 2), (2, 2)]
 blinker = [(0, 0), (1, 0), (2, 0)]
 beacon = [(0, 0), (1, 0), (0, 1), (3, 2), (2, 3), (3, 3)]
 
 -- | Starting grid containing common patterns at certain coordinates.
-start :: Grid Cell
-start =
+startWithPatterns :: Grid Cell
+startWithPatterns =
     mkGrid $ glider `at` (0, 0) ++ beacon `at` (15, 5) ++ blinker `at` (16, 4)
+
+startEmpty :: Grid Cell
+startEmpty = mkGrid []
