@@ -2,9 +2,21 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Life where
+module Life
+    ( gridSize
+    , Grid
+    , Coord
+    , Cell (Alive, Dead)
+    , Rule
+    , basicRule
+    , step
+    , showGrid
+    , startWithPatterns
+    , startEmpty
+    )
+where
 
-import           Data.Bool                      ( bool )
+import           Prelude
 import           Data.Functor.Compose           ( Compose(..) )
 import           Data.Distributive              ( Distributive(..) )
 import qualified Data.Vector                   as V
@@ -13,7 +25,7 @@ import           Data.Functor.Rep               ( Representable(..)
                                                 )
 import           Data.Functor.Identity          ( Identity(..) )
 import           Control.Comonad.Representable.Store
-                                                ( Store(..)
+                                                ( Store
                                                 , StoreT(..)
                                                 , store
                                                 , experiment
@@ -55,8 +67,8 @@ data Cell = Alive | Dead
 
 -- | Given a list of the coords that are alive, creates the grid.
 mkGrid :: [Coord] -> Grid Cell
-mkGrid xs = store lookup (0, 0)
-    where lookup p = if p `elem` xs then Alive else Dead
+mkGrid xs = store posAlive (0, 0)
+    where posAlive p = if p `elem` xs then Alive else Dead
 
 -- | Generic rules for the game that determine how a cell changes based on the current grid.
 type Rule = Grid Cell -> Cell

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fdbc34fa28957f719b3539223c2915c7106ec564a77c731ccdcbe9645354efb2
+-- hash: 858f0f3a5bb0f85bef75f1a22eedc52739e566d849e670e688f1f3a7ca1ca624
 
 name:           Game-Of-Life
 version:        0.1.0.0
@@ -44,7 +44,7 @@ executable Game-Of-Life-exe
       Paths_Game_Of_Life
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-deriving-strategies
   build-depends:
       Game-Of-Life
     , adjunctions
@@ -62,7 +62,7 @@ test-suite Game-Of-Life-test
       Paths_Game_Of_Life
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Weverything -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-missing-local-signatures -Wno-monomorphism-restriction -Wno-missing-deriving-strategies
   build-depends:
       Game-Of-Life
     , adjunctions

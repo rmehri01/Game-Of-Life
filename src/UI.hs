@@ -1,7 +1,10 @@
-module UI where
+module UI
+  ( runSimulation
+  )
+where
 
+import           Prelude
 import           Life
-import           Data.Functor.Identity          ( Identity(..) )
 import           Control.Comonad.Representable.Store
 import           Control.Comonad                ( extract )
 import           Graphics.Gloss
@@ -56,9 +59,11 @@ handleEvent :: Event -> (Grid Cell, Bool) -> (Grid Cell, Bool)
 handleEvent e w@(g, b) = case e of
   (EventKey (SpecialKey KeySpace) Down _ _) -> (g, not b)
   (EventKey (MouseButton LeftButton) Down _ (x, y)) ->
-    let shift = gridSize `div` 2
+    let halfGrid = gridSize `div` 2
         clickedCoord =
-            (-(ceiling (y / squareLen)) + shift, floor (x / squareLen) + shift)
+            ( -(ceiling (y / squareLen)) + halfGrid
+            , floor (x / squareLen) + halfGrid
+            )
     in  (step (flipCoord clickedCoord) g, b)
   _ -> w
 
