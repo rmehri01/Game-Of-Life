@@ -6,7 +6,7 @@ module Life
     ( gridSize
     , Grid
     , Coord
-    , Cell (Alive, Dead)
+    , Cell(Alive, Dead)
     , Rule
     , basicRule
     , step
